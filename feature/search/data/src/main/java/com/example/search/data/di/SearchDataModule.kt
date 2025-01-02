@@ -1,6 +1,6 @@
 package com.example.search.data.di
 
-import com.example.search.data.Repository.SearchRepositoryImpl
+import com.example.search.data.repository.SearchRepositoryImpl
 import com.example.search.data.remote.SearchApiService
 import com.example.search.domain.repository.SearchRepository
 import dagger.Module
