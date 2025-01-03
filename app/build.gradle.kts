@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
+
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -31,11 +34,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -44,9 +47,9 @@ android {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
-//    kotlin {
-//        jvmToolchain(17) // Ensure Java 17 is used
-//    }
+    kotlin {
+        jvmToolchain(17)
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -75,4 +78,15 @@ dependencies {
     implementation(libs.compose.runtime)
     implementation("androidx.compose.ui:ui:${libs.versions.composeUi.get()}") // Ensure the Compose UI is included
 
+    implementation(libs.hilt.android) // Hilt Android library
+    ksp(libs.hilt.compiler)
+    implementation(libs.navigation.compose)
+
+    implementation(project(":feature:search:domain"))
+    implementation(project(":feature:search:data"))
+    implementation(project(":feature:search:ui"))
+    implementation(project(":common"))
+    implementation(project(":media_player"))
+
+    implementation(libs.palantir.javapoet)
 }
