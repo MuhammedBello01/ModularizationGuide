@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
 
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.hilt) // Hilt Plugin
+    alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
 
@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.material3.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -50,10 +51,12 @@ dependencies {
 
     implementation(project(":common"))
     implementation(project(":feature:search:domain"))
-    implementation(libs.hilt.android) // Hilt Android library
+    implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.navigation.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.hilt.compose.navigation)
 
 
 }

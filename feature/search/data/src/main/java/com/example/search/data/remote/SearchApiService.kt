@@ -8,9 +8,9 @@ import retrofit2.http.Query
 
 interface SearchApiService {
 
-    // https://www.themealdb.com/api/json/v1/1/search.php?s=chicken
+    // https://www.themealdb.com/api/json/v1/1/search.php?s=chicken https://www.themealdb.com/api/json/v1/1/search.php?s=chicken
 
-    @GET("api/json/v1/A/search.php")
+    @GET("api/json/v1/1/search.php")
     suspend fun getRecipes(
         @Query("s") s: String
     ): Response<RecipeResponse>

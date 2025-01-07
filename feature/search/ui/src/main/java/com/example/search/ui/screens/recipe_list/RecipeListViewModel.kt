@@ -6,6 +6,8 @@ import com.example.common.utils.NetworkResult
 import com.example.common.utils.UiText
 import com.example.search.domain.model.Recipe
 import com.example.search.domain.use_cases.GetAllRecipeUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,12 +16,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class RecipeListViewModel @Inject constructor(
     private val getAllRecipeUseCase: GetAllRecipeUseCase
 ): ViewModel() {
 
-    private val _uiState = MutableStateFlow(RecipeList.UiState())
-    val uistate: StateFlow<RecipeList.UiState> get() = _uiState.asStateFlow()
+//    private val _searchRecipeState = MutableStateFlow(RecipeList.UiState())
+//    val uistate: StateFlow<RecipeList.UiState> get() = _searchRecipeState.asStateFlow()
+        private val _searchRecipeState = MutableStateFlow<SearchRecipeState>(SearchRecipeState.Default)
+        val searchRecipeState: StateFlow<SearchRecipeState> = _searchRecipeState.asStateFlow()
+
+    private val _uiState = MutableStateFlow(SearchRecipeUiState())
+    val uiState: StateFlow<SearchRecipeUiState> = _uiState.asStateFlow()
+
+    private var searchRecipeJob: Job? = null
 
     fun onEvent(event: RecipeList.Event){
         when(event){
@@ -27,30 +37,90 @@ class RecipeListViewModel @Inject constructor(
         }
     }
 
-    private fun search(q: String) = viewModelScope.launch {
+     private fun search(q: String) = viewModelScope.launch {
         getAllRecipeUseCase.invoke(q)
             .collectLatest { result ->
             when(result){
                 is NetworkResult.Loading -> {
-                    _uiState.update { RecipeList.UiState(isLoading = true) }
+                    _searchRecipeState.value = SearchRecipeState.Loading
+                    _uiState.update {
+                        SearchRecipeUiState(isLoading = true)
+                    }
                 }
                 is NetworkResult.Error -> {
-                    _uiState.update { RecipeList.UiState(error = UiText.RemoteString(result.message.toString()))
-                        // it.copy(
-                        // isLoading = false,
-                        //error = UiText.RemoteString(result.message.toString())
-                        //)
-                     }
+                    _searchRecipeState.value = SearchRecipeState.Failure(errorMessage = result.message ?: "Something went wrong", title = "Failed")
+                    _uiState.update {
+                        SearchRecipeUiState(isFailure = true, errorMessage = result.message ?: "Something went wrong")
+                    }
                 }
-                is NetworkResult.Success -> { _uiState.update { RecipeList.UiState(data = result.data) } }
+                is NetworkResult.Success -> {
+                    _searchRecipeState.value = SearchRecipeState.Success(data = result.data)
+                    _uiState.update{
+                        SearchRecipeUiState(recipes = result.data)
+                    }
+
+                }
+
             }
         }
     }
+
+    private fun searchV2(query: String) {
+        if (searchRecipeJob != null) return
+        searchRecipeJob = viewModelScope.launch {
+            getAllRecipeUseCase.invoke(query)
+                .collectLatest { result ->
+                    when (result) {
+                        is NetworkResult.Loading -> {
+                            _searchRecipeState.value = SearchRecipeState.Loading
+                            _uiState.update { it.copy(isLoading = true) }
+                        }
+                        is NetworkResult.Error -> {
+                            _searchRecipeState.value = SearchRecipeState.Failure(
+                                errorMessage = result.message ?: "Something went wrong",
+                                title = "Failed"
+                            )
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isFailure = true,
+                                    errorMessage = result.message ?: "Something went wrong"
+                                )
+                            }
+                        }
+                        is NetworkResult.Success -> {
+                            _searchRecipeState.value = SearchRecipeState.Success(data = result.data)
+                            _uiState.update {
+                                it.copy(
+                                    recipes = result.data,
+                                    isLoading = false,
+                                    isFailure = false
+                                )
+                            }
+                        }
+                    }
+                }
+            searchRecipeJob = null
+        }
+    }
+
 }
 
 
+sealed interface SearchRecipeState {
+    data class Success(val data: List<Recipe>?) : SearchRecipeState
+    data class Failure(val errorMessage: String, val title: String) : SearchRecipeState
+    data object Loading : SearchRecipeState
+    data object Default : SearchRecipeState
 
+}
 
+data class SearchRecipeUiState(
+    val isLoading: Boolean = false,
+    val isFailure: Boolean = false,
+    val errorMessage: String? = null,
+    val recipes: List<Recipe>? = null
+)
 
 object RecipeList{
     data class UiState(

@@ -11,8 +11,8 @@ fun List<RecipeDTO>.toDomain(): List<Recipe> = map {
         strMeal = it.strMeal,
         strMealThumb = it.strMealThumb,
         strCategory = it.strCategory,
-        strTags = it.strTags,
-        strYoutube = it.strYoutube,
+        strTags = it.strTags ?: "",
+        strYoutube = it.strYoutube ?: "",
         strInstructions = it.strInstructions,
     )
 }
@@ -24,8 +24,8 @@ fun RecipeDTO.toDomain(): RecipeDetails {
         strMeal = strMeal,
         strMealThumb = strMealThumb,
         strCategory = strCategory,
-        strTags = strTags,
-        strYoutube = strYoutube,
+        strTags = strTags ?: "",
+        strYoutube = strYoutube ?: "",
         strInstructions = strInstructions,
         ingredientsPair = this.getIngredientsPairWithItsMeasure(),
     )
