@@ -24,7 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,23 +35,44 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.common.utils.UiText
+import com.example.common.navigation.NavigationRoute
 import com.example.search.domain.model.Recipe
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RecipeListScreen(
     modifier: Modifier = Modifier,
     viewModel: RecipeListViewModel,
+    navHostController: NavHostController,
     onClick: (String) -> Unit
 ){
     val searchRecipeState by viewModel.searchRecipeState.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     val query = rememberSaveable {
         mutableStateOf("")
     }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(key1 = viewModel.navigation) {
+        viewModel.navigation
+            .flowWithLifecycle(lifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+            .collectLatest {
+                when (it) {
+                    is RecipeListHandler.Navigation.GotoRecipeDetails -> {
+                        navHostController.navigate(NavigationRoute.RecipeDetails.sendId(it.id))
+                    }
+                }
+            }
+    }
+
 
     Scaffold(topBar = {
         TextField(
@@ -63,7 +84,7 @@ fun RecipeListScreen(
             },
             value = query.value, onValueChange = {
             query.value = it
-                viewModel.onEvent(RecipeList.Event.SearchRecipe(query.value))
+                viewModel.onEvent(RecipeListHandler.Event.SearchRecipe(query.value))
                 //viewModel.search(query.value)
         }, colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
@@ -89,6 +110,7 @@ fun RecipeListScreen(
                 }
             }
             is SearchRecipeState.Success -> {
+                //val recipe = searchRecipeState.data
                 val recipe = uiState.recipes
                 recipe?.let { item ->
                     LazyColumn(

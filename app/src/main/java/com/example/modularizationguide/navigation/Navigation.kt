@@ -14,7 +14,7 @@ fun RecipeNavigation(modifier: Modifier = Modifier, navigationSubGraphs: Navigat
         startDestination = NavigationSubGraphRoute.Search.route
     ){
         navigationSubGraphs.searchFeatureApi.registerGraph(
-            navController = navHostController,
+            navHostController = navHostController,
             navGraphBuilder = this
         )
     }

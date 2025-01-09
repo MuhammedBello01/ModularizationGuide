@@ -10,7 +10,7 @@ class SearchRepositoryImpl(private val searchApiService: SearchApiService): Sear
     override suspend fun getRecipes(s: String): Result<List<Recipe>> {
         return try {
             val response = searchApiService.getRecipes(s)
-            return if (response.isSuccessful) {
+             if (response.isSuccessful) {
                 val meals = response.body()?.meals
                 if (meals != null && meals.any()) {
                     Result.success(meals.toDomain())

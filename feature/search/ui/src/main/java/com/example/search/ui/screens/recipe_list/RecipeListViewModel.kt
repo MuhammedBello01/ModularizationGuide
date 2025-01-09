@@ -8,10 +8,13 @@ import com.example.search.domain.model.Recipe
 import com.example.search.domain.use_cases.GetAllRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,16 +27,24 @@ class RecipeListViewModel @Inject constructor(
 //    private val _searchRecipeState = MutableStateFlow(RecipeList.UiState())
 //    val uistate: StateFlow<RecipeList.UiState> get() = _searchRecipeState.asStateFlow()
         private val _searchRecipeState = MutableStateFlow<SearchRecipeState>(SearchRecipeState.Default)
-        val searchRecipeState: StateFlow<SearchRecipeState> = _searchRecipeState.asStateFlow()
+        val searchRecipeState: StateFlow<SearchRecipeState> = _searchRecipeState//.asStateFlow()
 
     private val _uiState = MutableStateFlow(SearchRecipeUiState())
     val uiState: StateFlow<SearchRecipeUiState> = _uiState.asStateFlow()
 
+    private val _navigation = Channel<RecipeListHandler.Navigation>()
+    val navigation: Flow<RecipeListHandler.Navigation> = _navigation.receiveAsFlow()
+
     private var searchRecipeJob: Job? = null
 
-    fun onEvent(event: RecipeList.Event){
+    fun onEvent(event: RecipeListHandler.Event){
         when(event){
-            is RecipeList.Event.SearchRecipe -> { search(event.q) }
+            is RecipeListHandler.Event.SearchRecipe -> { search(event.q) }
+            is RecipeListHandler.Event.GotoRecipeDetails -> {
+                viewModelScope.launch {
+                    _navigation.send(RecipeListHandler.Navigation.GotoRecipeDetails(event.id))
+                }
+            }
         }
     }
 
@@ -77,7 +88,7 @@ class RecipeListViewModel @Inject constructor(
                         }
                         is NetworkResult.Error -> {
                             _searchRecipeState.value = SearchRecipeState.Failure(
-                                errorMessage = result.message ?: "Something went wrong",
+                                errorMessage = result.message.toString(),
                                 title = "Failed"
                             )
                             _uiState.update {
@@ -94,7 +105,8 @@ class RecipeListViewModel @Inject constructor(
                                 it.copy(
                                     recipes = result.data,
                                     isLoading = false,
-                                    isFailure = false
+                                    isFailure = false,
+                                    errorMessage = null
                                 )
                             }
                         }
@@ -122,7 +134,7 @@ data class SearchRecipeUiState(
     val recipes: List<Recipe>? = null
 )
 
-object RecipeList{
+object RecipeListHandler{
     data class UiState(
         val isLoading: Boolean = false,
         val error: UiText = UiText.Idle,
@@ -135,6 +147,7 @@ object RecipeList{
 
     sealed interface Event{
         data class SearchRecipe(val q: String): Event
+        data class  GotoRecipeDetails(val id: String): Event
     }
 
 }

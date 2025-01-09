@@ -15,9 +15,9 @@ interface SearchApiService {
         @Query("s") s: String
     ): Response<RecipeResponse>
 
-    // https://www.themealdb.com/api/json/v1/1/lookup-php?i=52771
+    // https://www.themealdb.com/api/json/v1/1/lookup.php?i=52771
 
-    @GET("api/json/v1/1/lookup-php")
+    @GET("api/json/v1/1/lookup.php")
     suspend fun getRecipeDetails(
         @Query("i") i : String
     ): Response<RecipeDetailResponse>
