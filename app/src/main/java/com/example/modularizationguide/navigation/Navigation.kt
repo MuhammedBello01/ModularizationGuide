@@ -17,5 +17,9 @@ fun RecipeNavigation(modifier: Modifier = Modifier, navigationSubGraphs: Navigat
             navHostController = navHostController,
             navGraphBuilder = this
         )
+        navigationSubGraphs.MediaPlayerApi.registerGraph(
+            navHostController = navHostController,
+            navGraphBuilder = this
+        )
     }
 }

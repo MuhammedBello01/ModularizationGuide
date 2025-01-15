@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -103,11 +104,11 @@ fun RecipeListScreen(
                 viewModel.onEvent(RecipeListHandler.Event.SearchRecipe(query.value))
                 //viewModel.search(query.value)
         }, colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Gray,
             unfocusedIndicatorColor = Color.Transparent,
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent
-        ), modifier = Modifier.fillMaxWidth())
+        ), modifier = Modifier.fillMaxWidth().padding(top = 30.dp))
     }){ paddingValues ->
         when(searchRecipeState){
             is SearchRecipeState.Loading -> {
@@ -145,7 +146,7 @@ fun RecipeListScreen(
                                     contentDescription = "Meal Image",
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(250.dp),
+                                        .height(150.dp).clip(RoundedCornerShape(12.dp)),
                                     contentScale = ContentScale.Crop
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
@@ -154,13 +155,11 @@ fun RecipeListScreen(
                                     Text(
                                         text = it.strMeal,
                                         style = MaterialTheme.typography.bodyLarge,
-                                        color = if (it.strMeal.isEmpty()) Color.Gray else Color.Black
                                     )
                                     Spacer(modifier = Modifier.height(12.dp))
                                     Text(
                                         text = it.strInstructions,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = if (it.strMeal.isEmpty()) Color.Gray else Color.Black,
                                         overflow = TextOverflow.Ellipsis,
                                         maxLines = 4
                                     )

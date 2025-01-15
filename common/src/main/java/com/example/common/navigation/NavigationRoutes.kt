@@ -7,11 +7,16 @@ sealed class NavigationRoute(val route: String){
         fun sendId(id: String) = "/recipe_details/${id}"
     }
     data object FavoriteScreen: NavigationRoute("/favorite")
+
+    data object MediaPlayer: NavigationRoute("/player/{video_id}"){
+        fun sendUrl(videoUrl: String) = "/player/$videoUrl"
+    }
 }
 
 
 sealed class NavigationSubGraphRoute(val route: String){
 
     data object Search: NavigationSubGraphRoute("/search")
+    data object MediaPlayer: NavigationSubGraphRoute("/media_player")
 
 }

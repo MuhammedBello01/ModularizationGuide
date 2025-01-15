@@ -29,9 +29,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ModularizationGuideTheme {
-                Surface (modifier = Modifier.safeContentPadding()){
+                Surface {
                     RecipeNavigation(navigationSubGraphs = navigationSubGraphs)
-
                 }
             }
         }

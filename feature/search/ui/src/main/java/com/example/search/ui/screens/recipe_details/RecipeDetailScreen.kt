@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -41,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.common.navigation.NavigationRoute
 import com.example.search.domain.model.RecipeDetails
 import kotlinx.coroutines.flow.collectLatest
 
@@ -64,12 +66,16 @@ fun RecipeDetailScreen(
         viewModel.navigation.flowWithLifecycle(lifecycleOwner.lifecycle)
             .collectLatest { navigation ->
                 when (navigation) {
-                    RecipeDetailsHandler.Navigation.GotoRecipeListScreen -> navHostController.popBackStack()
+                    is RecipeDetailsHandler.Navigation.GotoRecipeListScreen -> navHostController.popBackStack()
+                    is RecipeDetailsHandler.Navigation.GotoMediaPlayer -> {
+                        val videoId = navigation.youtubeUrl.split("v=").last()
+                        navHostController.navigate(NavigationRoute.MediaPlayer.sendUrl(videoId))
+                    }
                 }
             }
     }
 
-    Scaffold (topBar = {
+    Scaffold (modifier = Modifier.padding(horizontal = 12.dp), topBar = {
         TopAppBar(
             title = {
                 Text(text = uiState.recipeDetail?.strMeal.toString(), style = MaterialTheme.typography.bodyLarge)
@@ -125,13 +131,12 @@ fun RecipeDetailScreen(
                         modifier = Modifier
                             .padding()
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState()
-                            )
+                            .verticalScroll(rememberScrollState())
                     ) {
                         AsyncImage(
-                            model = it.strMealThumb, contentDescription = null, modifier = Modifier
+                            model = it.strMealThumb, contentDescription = null, modifier = Modifier.padding(horizontal = 16.dp)
                             .fillMaxWidth()
-                            .height(350.dp),
+                            .height(300.dp).clip(RoundedCornerShape(12.dp)),
                             contentScale = ContentScale.Crop
 
                         )
@@ -140,7 +145,7 @@ fun RecipeDetailScreen(
                             Text(text = it.strInstructions, style = MaterialTheme.typography.bodyMedium)
                             Spacer(modifier = Modifier.height(12.dp))
                             it.ingredientsPair.forEach {
-                                if (it.first.isNotEmpty() || it.second.isNotEmpty()){
+                                if (it.first.isNotEmpty() && it.second.isNotEmpty()){
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -166,11 +171,13 @@ fun RecipeDetailScreen(
                                 }
                             }
                             Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = "Watch Youtube Video",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
+                            if (it.strYoutube.isNotEmpty()){
+                                Text(modifier = Modifier.clickable {
+                                    viewModel.onEvent(RecipeDetailsHandler.Event.GotoMediaPlayer(it.strYoutube))
+                                }, text = "Watch Youtube Video", style = MaterialTheme.typography.bodySmall)
+                                Spacer(modifier = Modifier.height(32.dp))
+                            }
+
                         }
 
                     }
