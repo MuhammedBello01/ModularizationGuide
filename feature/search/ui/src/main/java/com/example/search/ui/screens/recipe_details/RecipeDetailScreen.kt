@@ -30,8 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,9 +52,9 @@ fun RecipeDetailScreen(
     navHostController: NavHostController,
     onNavigationClicked: () -> Unit,
     onDelete: (RecipeDetails) -> Unit,
-    onFavorite: (RecipeDetails) -> Unit
+    onFavoriteClick: (RecipeDetails) -> Unit
 ){
-    val uiState by viewModel.uistate.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val recipeDetailsState by viewModel.getRecipeDetailsState.collectAsStateWithLifecycle()
     //var pageTitle = rememberSaveable { mutableStateOf(" ") }
 
@@ -81,10 +79,14 @@ fun RecipeDetailScreen(
                 })
 
             }, actions = {
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    uiState.recipeDetail?.let { onFavoriteClick.invoke(it) }
+                }) {
                     Icon(imageVector = Icons.Default.Star, contentDescription = null)
                 }
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    uiState.recipeDetail?.let { onDelete.invoke(it) }
+                }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = null)
                 }
             })

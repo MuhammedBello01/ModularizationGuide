@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.common.utils.NetworkResult
 import com.example.common.utils.UiText
+import com.example.search.domain.model.Recipe
 import com.example.search.domain.model.RecipeDetails
+import com.example.search.domain.use_cases.DeleteRecipeUseCase
+import com.example.search.domain.use_cases.GetAllRecipeFromDbUseCase
 import com.example.search.domain.use_cases.GetRecipeDetailsUseCase
+import com.example.search.domain.use_cases.InsertRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -21,10 +25,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RecipeDetailsViewModel @Inject constructor(
-    private val getRecipeDetailsUseCase: GetRecipeDetailsUseCase
+    private val getRecipeDetailsUseCase: GetRecipeDetailsUseCase,
+    private val deleteRecipeUseCase: DeleteRecipeUseCase,
+    private val insertRecipeUseCase: InsertRecipeUseCase,
+    private val getAllRecipeFromDbUseCase: GetAllRecipeFromDbUseCase
 ): ViewModel() {
     private val _uiState = MutableStateFlow(RecipeDetailsUiState())
-    val uistate: StateFlow<RecipeDetailsUiState> get() = _uiState.asStateFlow()
+    val uiState: StateFlow<RecipeDetailsUiState> get() = _uiState.asStateFlow()
 
     private val _getRecipeDetailState = MutableStateFlow<GetRecipeDetailsState>(GetRecipeDetailsState.Default)
     val getRecipeDetailsState: StateFlow<GetRecipeDetailsState> = _getRecipeDetailState.asStateFlow()
@@ -40,6 +47,15 @@ class RecipeDetailsViewModel @Inject constructor(
                     _navigation.send(RecipeDetailsHandler.Navigation.GotoRecipeListScreen)
                 }
             }
+
+            is RecipeDetailsHandler.Event.DeleteRecipe -> {
+                deleteRecipeUseCase.invoke(event.recipeDetail.toRecipe())
+                    .launchIn(viewModelScope)
+            }
+            is RecipeDetailsHandler.Event.InsertRecipe -> {
+                insertRecipeUseCase.invoke(event.recipeDetail.toRecipe())
+                    .launchIn(viewModelScope)
+            }
         }
     }
 
@@ -49,11 +65,11 @@ class RecipeDetailsViewModel @Inject constructor(
             when(result){
                 is NetworkResult.Loading -> {
                     _getRecipeDetailState.value = GetRecipeDetailsState.Loading
-                    //_uiState.update { RecipeDetailsUiState(isLoading = true) }
+                    _uiState.update { RecipeDetailsUiState(isLoading = true) }
                 }
                 is NetworkResult.Error -> {
                     _getRecipeDetailState.value = GetRecipeDetailsState.Failure(errorMessage = result.message.toString())
-                    //_uiState.update { RecipeDetailsUiState(isFailure = true, errorMessage = result.message) }
+                    _uiState.update { RecipeDetailsUiState(isFailure = true, errorMessage = result.message) }
                 }
                 is NetworkResult.Success -> {
                     _getRecipeDetailState.value = GetRecipeDetailsState.Success(data = result.data)
@@ -61,7 +77,22 @@ class RecipeDetailsViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+
 }
+
+fun RecipeDetails.toRecipe(): Recipe {
+    return Recipe(
+        idMeal,
+        strArea,
+        strMeal,
+        strMealThumb,
+        strCategory,
+        strTags,
+        strYoutube,
+        strInstructions
+    )
+}
+
 
 sealed interface GetRecipeDetailsState {
     data class Success(val data: RecipeDetails?) : GetRecipeDetailsState
@@ -94,6 +125,8 @@ object RecipeDetailsHandler{
     sealed interface Event{
         data class FetchRecipeDetails(val id: String) : Event
         data object GotoRecipeListScreen: Event
+        data class InsertRecipe(val recipeDetail: RecipeDetails) : Event
+        data class DeleteRecipe(val recipeDetail: RecipeDetails) : Event
     }
 
 }

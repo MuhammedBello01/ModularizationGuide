@@ -89,4 +89,8 @@ dependencies {
     implementation(project(":media_player"))
 
     implementation(libs.palantir.javapoet)
+
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
 }

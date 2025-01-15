@@ -48,8 +48,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-//    implementation(project(":feature:search:domain"))
-//    implementation(project(":feature:search:domain"))
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,11 +56,11 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson.convertor)
 
-    //implementation(libs.dagger.hilt)
-    //kapt(libs.dagger.kapt)
-    //ksp(libs.dagger.kapt)
+
     implementation(libs.hilt.android) // Hilt Android library
     ksp(libs.hilt.compiler)
     implementation(libs.compose.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
 }
