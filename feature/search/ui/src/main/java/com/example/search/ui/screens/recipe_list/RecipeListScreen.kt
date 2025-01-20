@@ -110,7 +110,7 @@ fun RecipeListScreen(
             unfocusedContainerColor = Color.Transparent
         ), modifier = Modifier.fillMaxWidth().padding(top = 30.dp))
     }){ paddingValues ->
-        when(searchRecipeState){
+        when(val state = searchRecipeState){
             is SearchRecipeState.Loading -> {
                 Box(modifier = Modifier
                     .padding(paddingValues)

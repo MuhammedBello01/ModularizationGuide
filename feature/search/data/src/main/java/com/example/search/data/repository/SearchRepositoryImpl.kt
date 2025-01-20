@@ -23,7 +23,8 @@ class SearchRepositoryImpl(
                     Result.failure(Exception("No recipes found"))
                 }
             } else {
-                Result.failure(Exception("Failed to fetch recipes: ${response.code()}"))
+                //Result.failure(Exception("Failed to fetch recipes: ${response.code()}"))
+                 Result.failure(Exception("error occurred"))
             }
         }catch (e : Exception){
             Result.failure(e)
@@ -42,7 +43,8 @@ class SearchRepositoryImpl(
                    Result.failure(Exception("No recipe details found"))
                }
            }else {
-               Result.failure(Exception("Failed to fetch recipes: ${response.code()}"))
+               //Result.failure(Exception("Failed to fetch recipes: ${response.code()}"))
+               Result.failure(Exception("error occurred"))
            }
        }catch (e : Exception){
            Result.failure(e)

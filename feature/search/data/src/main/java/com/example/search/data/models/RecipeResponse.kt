@@ -4,6 +4,6 @@ data class RecipeResponse(
     val meals: List<RecipeDTO>? = null
 )
 
-data class RecipeDetailResponse(
+data class RecipeDetailsResponse(
     val meals: List<RecipeDTO>? = null
 )

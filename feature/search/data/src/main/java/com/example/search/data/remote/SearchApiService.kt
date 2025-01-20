@@ -1,6 +1,6 @@
 package com.example.search.data.remote
 
-import com.example.search.data.models.RecipeDetailResponse
+import com.example.search.data.models.RecipeDetailsResponse
 import com.example.search.data.models.RecipeResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -20,5 +20,5 @@ interface SearchApiService {
     @GET("api/json/v1/1/lookup.php")
     suspend fun getRecipeDetails(
         @Query("i") i : String
-    ): Response<RecipeDetailResponse>
+    ): Response<RecipeDetailsResponse>
 }

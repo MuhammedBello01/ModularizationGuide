@@ -63,4 +63,7 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    testImplementation(libs.test.coroutines)
+    testImplementation(libs.mockito)
+
 }
